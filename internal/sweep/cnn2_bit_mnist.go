@@ -18,14 +18,14 @@ var CamSyncAlphas = []float64{0.01, 0.10, 0.50, 0.75, 1.00}
 // CamSyncLabels for display.
 var CamSyncLabels = []string{"1%", "10%", "50%", "75%", "100%"}
 
-// CNN2BitMNIST is cam 1–6 × CamSync × all uniform train modes × cam-mix pairs × DefaultLRs.
+// CNN2BitMNIST is cam 1–3 × CamSync × all uniform train modes × cam-mix pairs × DefaultLRs.
 func CNN2BitMNIST(_ float64) ([]permute.Cell, map[string]float64, error) {
 	modes := permute.AllModes()
 	base := permute.Expand(permute.Config{
 		DTypes:  []core.DType{core.DTypeBinary},
 		Formats: []quant.Format{quant.FormatNone},
 		Modes:   modes,
-		Cams:    permute.CamsRange(1, 6),
+		Cams:    permute.CamsRange(1, 3),
 	})
 	uniform := expandCamSync(base, CamSyncAlphas)
 	mix := expandMix(modes, CamSyncAlphas)

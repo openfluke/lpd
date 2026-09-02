@@ -12,8 +12,8 @@ func TestCNN2BitMNISTSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantUniform := len(modes) * (1 + 5*5)
-	wantMix := len(modes) * (len(modes) - 1) * len(MixPatterns) * 5 * 5
+	wantUniform := len(modes) * (1 + 2*5) // cam 1 + cams 2–3 × CamSync
+	wantMix := len(modes) * (len(modes) - 1) * len(MixPatterns) * 2 * 5
 	want := (wantUniform + wantMix) * len(DefaultLRs)
 	if len(cells) != want {
 		t.Fatalf("cells=%d want %d (uniform %d + mix %d) × %d lrs",

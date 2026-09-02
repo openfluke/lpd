@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Wipe test 1 sweep progress (results + checkpoint). Keeps downloads/mnist cache.
+set -euo pipefail
+
+LPD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RESULTS="${LPD_ROOT}/cnn2/bit/mnist/results"
+PIDFILE="${LPD_ROOT}/.lpd.pid"
+
+FORCE=0
+for arg in "$@"; do
+	[[ "$arg" == "--force" || "$arg" == "-f" ]] && FORCE=1
+done
+
+if [[ -f "${PIDFILE}" ]]; then
+	pid="$(cat "${PIDFILE}")"
+	if kill -0 "${pid}" 2>/dev/null; then
+		if [[ $FORCE -eq 0 ]]; then
+			echo "lpd is running (pid ${pid}) — stop first: ./mac/stop"
+			echo "or: ./test1/nuke --force  (stops lpd then wipes)"
+			exit 1
+		fi
+		echo "Stopping lpd (pid ${pid})…"
+		kill -TERM "${pid}" 2>/dev/null || true
+		for _ in $(seq 1 15); do
+			kill -0 "${pid}" 2>/dev/null || break
+			sleep 1
+		done
+		kill -9 "${pid}" 2>/dev/null || true
+		rm -f "${PIDFILE}"
+	fi
+fi
+
+if [[ -d "${RESULTS}" ]]; then
+	echo "Removing ${RESULTS}/ …"
+	rm -rf "${RESULTS}"
+fi
+mkdir -p "${RESULTS}"
+
+echo "Test 1 nuked — empty ${RESULTS}"
+echo "MNIST cache kept at ${LPD_ROOT}/downloads/mnist"
+echo "Restart: ./mac/start  (or go run . -test=1)"

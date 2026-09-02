@@ -60,11 +60,11 @@ Or pick from the menu:
 go run . -menu
 ```
 
-Test **1** — `cnn2/bit/mnist` (~211k cells before sharding):
+Test **1** — `cnn2/bit/mnist` (~74k cells before sharding):
 
 - dtype: **binary** (FormatNone)
 - layer: **CNN2** stem + cameral head
-- cams: **1–6**
+- cams: **1–3**
 - CamSync: **1%, 10%, 50%, 75%, 100%** (cam ≥ 2)
 - modes: **31 uniform** stack modes + **cam-mix** (distinct mode pairs × alt/block/roundrobin)
 - lr: **0.005, 0.05, 0.5**
@@ -98,6 +98,18 @@ LPD_OCEAN_PEERS=http://<mac-a-ip>:8301,http://<mac-b-ip>:8301
 ```
 
 Open ocean at `:8090`, each worker tide at `:8301` (compare/LPD pages on same port).
+
+### Reset test 1
+
+Wipes `cnn2/bit/mnist/results` (progress, checkpoint, PDF). Keeps MNIST cache.
+
+```bash
+./mac/stop              # if running
+chmod +x test1/nuke
+./test1/nuke            # refuses if lpd still up
+./test1/nuke --force    # stop lpd then wipe
+./mac/start
+```
 
 ## Siblings
 

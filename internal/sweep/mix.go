@@ -15,10 +15,10 @@ var DefaultLRs = []float64{0.005, 0.05, 0.5}
 // MixPatterns assign two parent modes across N cams (alt / block / roundrobin).
 var MixPatterns = []string{"alt", "block", "roundrobin"}
 
-// expandMix builds cam-mix cells for cams 2–6: distinct ordered mode pairs × patterns × CamSync.
+// expandMix builds cam-mix cells for cams 2–3: distinct ordered mode pairs × patterns × CamSync.
 func expandMix(modes []permute.TrainMode, alphas []float64) []permute.Cell {
 	var out []permute.Cell
-	for n := 2; n <= 6; n++ {
+	for n := 2; n <= 3; n++ {
 		arch := permute.ArchForCams(n)
 		for _, pat := range MixPatterns {
 			for _, m0 := range modes {
