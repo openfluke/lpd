@@ -105,15 +105,6 @@ func Test(ctx context.Context, opt Options) error {
 		},
 	}
 
-	if cfg.WebOnly {
-		p := st.Progress()
-		fmt.Printf("web-only → %s\n", river.DashURLs(cfg.Addr))
-		fmt.Printf(" progress %d/%d (%.1f%%) · left %d\n", p.Done, p.Plan, p.Pct, p.Left)
-		go func() { _ = srv.ListenAndServe() }()
-		<-ctx.Done()
-		return nil
-	}
-
 	workers := cfg.Workers
 	if workers < 1 {
 		workers = runtime.NumCPU()
@@ -123,6 +114,18 @@ func Test(ctx context.Context, opt Options) error {
 		if workers > 8 {
 			workers = 8
 		}
+	}
+	srv.Workers = workers
+	srv.Subtitle = fmt.Sprintf("shard %d/%d · %d cells (of %d) · workers=%d · lr=%g",
+		cfg.Shard, cfg.Shards, len(cells), full, workers, cfg.LR)
+
+	if cfg.WebOnly {
+		p := st.Progress()
+		fmt.Printf("web-only → %s\n", river.DashURLs(cfg.Addr))
+		fmt.Printf(" progress %d/%d (%.1f%%) · left %d\n", p.Done, p.Plan, p.Pct, p.Left)
+		go func() { _ = srv.ListenAndServe() }()
+		<-ctx.Done()
+		return nil
 	}
 
 	dataDir := cfg.DataDir

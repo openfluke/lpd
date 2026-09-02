@@ -91,14 +91,30 @@ container_exists() {
 	podman container exists "${NAME}" 2>/dev/null
 }
 
+podman_cpus() {
+	local n
+	if [[ "$(uname -s)" == Darwin ]]; then
+		n="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+	else
+		n="$(nproc 2>/dev/null || echo 4)"
+	fi
+	if [[ "$n" -gt 8 ]]; then
+		n=8
+	fi
+	echo "$n"
+}
+
 run_container() {
 	ensure_data_dirs
 	ENV="$(env_file)"
+	CPUS="$(podman_cpus)"
 	echo "Using env: ${ENV}"
 	echo "Data on host: ${LPD_ROOT}/downloads  ${LPD_ROOT}/cnn2"
+	echo "Container CPUs: ${CPUS} (set LPD_WORKERS=${CPUS} in .env to match)"
 
 	podman run -d \
 		--name "${NAME}" \
+		--cpus="${CPUS}" \
 		--env-file "${ENV}" \
 		-p "8301:8301" \
 		-p "8090:8090" \
