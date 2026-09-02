@@ -104,6 +104,7 @@ run_container() {
 		-p "8090:8090" \
 		-v "$(vol_opt "${LPD_ROOT}/downloads" /app/downloads)" \
 		-v "$(vol_opt "${LPD_ROOT}/cnn2" /app/cnn2)" \
+		-v "$(vol_opt "${ENV}" /app/.env)" \
 		"${IMAGE}" \
 		"$@"
 }
