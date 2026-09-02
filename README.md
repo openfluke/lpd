@@ -21,6 +21,22 @@ cp .env.example .env
 go run .
 ```
 
+### Native Mac/Linux (fast — no Podman)
+
+Full CPU + native SIMD. Runs in the background with `nohup`.
+
+```bash
+cp .env.example .env
+chmod +x mac/*
+./mac/start          # compile + background run
+./mac/status         # pid + progress
+./mac/logs           # tail -f lpd.log
+./mac/stop           # stop process
+./mac/restart        # stop + start
+```
+
+Stop Podman first if it was running: `./podman/stop`
+
 ### Podman (Linux / macOS)
 
 Compiles **`bin/lpd`** (on Mac, via a one-off Linux builder container), then packs **only that binary** into the runtime image. The running pod has no source code. Data lives on the host under `downloads/` and `cnn2/` — stop/start does not delete it.

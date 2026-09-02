@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+if ! is_running; then
+	rm -f "${PIDFILE}"
+	echo "lpd is not running"
+	exit 0
+fi
+
+PID="$(read_pid)"
+echo "Stopping lpd (pid ${PID})…"
+kill -TERM "${PID}" 2>/dev/null || true
+
+for _ in $(seq 1 30); do
+	if ! kill -0 "${PID}" 2>/dev/null; then
+		rm -f "${PIDFILE}"
+		echo "stopped (data in downloads/ cnn2/ unchanged)"
+		exit 0
+	fi
+	sleep 1
+done
+
+echo "still running — kill -9 ${PID}"
+kill -9 "${PID}" 2>/dev/null || true
+rm -f "${PIDFILE}"
+echo "killed"

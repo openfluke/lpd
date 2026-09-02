@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+DO_BUILD=1
+for arg in "$@"; do
+	[[ "$arg" == "--no-build" ]] && DO_BUILD=0
+done
+
+if is_running; then
+	echo "already running (pid $(read_pid))"
+	print_urls
+	exit 0
+fi
+
+if [[ $DO_BUILD -eq 1 ]] || [[ ! -x "${BINARY}" ]]; then
+	build_binary
+elif [[ ! -x "${BINARY}" ]]; then
+	die "no bin/lpd — run ./mac/start (builds) or ./mac/build"
+fi
+
+ENV="$(env_file)"
+ensure_data_dirs
+
+cd "${LPD_ROOT}"
+nohup "${BINARY}" -env "${ENV##*/}" >>"${LOGFILE}" 2>&1 &
+echo $! >"${PIDFILE}"
+
+sleep 0.5
+if ! is_running; then
+	echo "failed to start — tail ${LOGFILE}:"
+	tail -20 "${LOGFILE}" 2>/dev/null || true
+	exit 1
+fi
+
+echo "Started pid $(read_pid) — logging to ${LOGFILE}"
+print_urls

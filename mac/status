@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+if is_running; then
+	echo "running pid $(read_pid)"
+	curl -sf http://127.0.0.1:8301/api/live 2>/dev/null | python3 -c "
+import sys, json
+try:
+ d=json.load(sys.stdin)
+ print('  done', d.get('epoch_done'), '/', d.get('plan') or d.get('cell_total'))
+ print('  workers', d.get('workers') or '?', 'running_n', d.get('running_n'))
+ print('  msg', (d.get('message') or '')[:90])
+except Exception as e:
+ print('  (dashboard up but json parse failed)', e)
+" 2>/dev/null || echo "  dashboard: http://127.0.0.1:8301"
+else
+	echo "not running"
+	[[ -f "${PIDFILE}" ]] && rm -f "${PIDFILE}"
+fi

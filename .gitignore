@@ -1,5 +1,7 @@
 downloads/
 cnn2/**/results/
 bin/
+.lpd.pid
+lpd.log
 *.env
 .env.local
