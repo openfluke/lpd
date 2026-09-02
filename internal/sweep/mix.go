@@ -10,7 +10,8 @@ import (
 )
 
 // DefaultLRs is the CNN2/bit/mnist learning-rate sweep.
-var DefaultLRs = []float64{0.005, 0.05, 0.5}
+// 0.005 skipped — binary cams/mixes stay near chance there.
+var DefaultLRs = []float64{0.05, 0.5}
 
 // MixPatterns assign two parent modes across N cams (alt / block / roundrobin).
 var MixPatterns = []string{"alt", "block", "roundrobin"}
