@@ -1,0 +1,4 @@
+downloads/
+cnn2/**/results/
+*.env
+.env.local
