@@ -27,13 +27,14 @@ Or pick from the menu:
 go run . -menu
 ```
 
-Test **1** — `cnn2/bit/mnist`:
+Test **1** — `cnn2/bit/mnist` (~211k cells before sharding):
 
 - dtype: **binary** (FormatNone)
 - layer: **CNN2** stem + cameral head
 - cams: **1–6**
 - CamSync: **1%, 10%, 50%, 75%, 100%** (cam ≥ 2)
-- modes: **all** Welvet train modes
+- modes: **31 uniform** stack modes + **cam-mix** (distinct mode pairs × alt/block/roundrobin)
+- lr: **0.005, 0.05, 0.5**
 - data: class-balanced MNIST subset (`downloads/mnist`)
 
 ## Two Macs

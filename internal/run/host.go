@@ -75,7 +75,7 @@ func Test(ctx context.Context, opt Options) error {
 	ckptDir := filepath.Join(cfg.OutDir, "checkpoint")
 	_ = os.MkdirAll(cfg.OutDir, 0o755)
 
-	st := river.NewStore(resultsPath, host, test.Matrix, cfg.TrainN, mnist.SampleSeed, []float64{cfg.LR})
+	st := river.NewStore(resultsPath, host, test.Matrix, cfg.TrainN, mnist.SampleSeed, sweep.DefaultLRs)
 	st.SetPlan(cells)
 
 	if cfg.OceanURL != "" {

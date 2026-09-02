@@ -22,7 +22,7 @@ var All = []Test{
 	{
 		ID:     1,
 		Slug:   "cnn2/bit/mnist",
-		Title:  "CNN2 · binary · MNIST — cam 1–6 × CamSync 1/10/50/75/100% × all train modes",
+		Title:  "CNN2 · binary · MNIST — uniform + cam-mix modes · cam 1–6 · CamSync · lr 0.005/0.05/0.5",
 		OutDir: "cnn2/bit/mnist/results",
 		Matrix: "cnn2_bit_mnist",
 		Build:  sweep.CNN2BitMNIST,
