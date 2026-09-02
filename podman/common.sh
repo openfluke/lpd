@@ -26,7 +26,8 @@ ensure_machine() {
 		fi
 		if ! podman info >/dev/null 2>&1; then
 			echo "Starting podman machine…"
-			podman machine start
+			podman machine start || true
+			podman info >/dev/null 2>&1 || die "podman machine not running — try: podman machine start"
 		fi
 	fi
 }

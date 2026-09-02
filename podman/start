@@ -46,5 +46,9 @@ if container_exists; then
 	podman rm -f "${NAME}" >/dev/null 2>&1 || true
 fi
 
-run_container "${EXTRA[@]}"
+if ((${#EXTRA[@]} > 0)); then
+	run_container "${EXTRA[@]}"
+else
+	run_container
+fi
 print_urls
