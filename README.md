@@ -23,16 +23,20 @@ go run .
 
 ### Podman (Linux / macOS)
 
-Requires sibling repos `../tide`, `../welvet`, `../webgpu` and [Podman](https://podman.io/) installed. On macOS, init the machine once: `podman machine init && podman machine start`.
+Compiles **`bin/lpd`** (on Mac, via a one-off Linux builder container), then packs **only that binary** into the runtime image. The running pod has no source code. Data lives on the host under `downloads/` and `cnn2/` — stop/start does not delete it.
 
 ```bash
 cp .env.example .env
-./podman/start      # build image + run (ports 8301, 8090)
-./podman/stop       # stop and remove container
-./podman/restart    # stop then start
+chmod +x podman/*
+./podman/build        # compile + pack image (binary only in pod)
+./podman/start        # run (reuses stopped container)
+./podman/stop         # stop — container kept; data stays in downloads/ cnn2/
+./podman/restart      # stop then start
 ```
 
-Persistent data is bind-mounted: `downloads/` (MNIST cache) and `cnn2/` (results).
+After code changes: `./podman/build && ./podman/start --recreate`
+
+Drop container only (data untouched): `./podman/stop --rm`
 
 Or pick from the menu:
 

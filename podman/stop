@@ -7,10 +7,27 @@ source "${SCRIPT_DIR}/common.sh"
 
 need_podman
 
-if podman container exists "${NAME}" 2>/dev/null; then
-	podman stop -t 15 "${NAME}" || true
-	podman rm -f "${NAME}" || true
+RM=0
+for arg in "$@"; do
+	[[ "$arg" == "--rm" ]] && RM=1
+done
+
+if ! container_exists; then
+	echo "container ${NAME} is not running"
+	exit 0
+fi
+
+if container_running; then
+	podman stop -t 30 "${NAME}" || true
 	echo "stopped ${NAME}"
 else
-	echo "container ${NAME} is not running"
+	echo "${NAME} was already stopped"
+fi
+
+if [[ $RM -eq 1 ]]; then
+	podman rm -f "${NAME}" >/dev/null 2>&1 || true
+	echo "removed container ${NAME} (host data unchanged: downloads/ cnn2/)"
+else
+	echo "container kept — ./podman/start will resume it"
+	echo "host data: ${LPD_ROOT}/downloads  ${LPD_ROOT}/cnn2"
 fi

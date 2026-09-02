@@ -8,38 +8,43 @@ source "${SCRIPT_DIR}/common.sh"
 need_podman
 ensure_machine
 
-BUILD=1
-if [[ "${1:-}" == "--no-build" ]]; then
-	BUILD=0
-	shift
-fi
+DO_BUILD=1
+RECREATE=0
+EXTRA=()
+for arg in "$@"; do
+	case "$arg" in
+	--no-build) DO_BUILD=0 ;;
+	--recreate) RECREATE=1 ;;
+	*) EXTRA+=("$arg") ;;
+	esac
+done
 
-if [[ $BUILD -eq 1 ]] || ! podman image exists "${IMAGE}" >/dev/null 2>&1; then
+if [[ $DO_BUILD -eq 1 ]]; then
+	build_binary
+	build_image
+elif [[ ! -x "${BINARY}" ]]; then
+	die "no bin/lpd — run ./podman/build first"
+elif ! podman image exists "${IMAGE}" >/dev/null 2>&1; then
 	build_image
 fi
 
-# Idempotent: replace any previous container with the same name.
-podman rm -f "${NAME}" >/dev/null 2>&1 || true
+if container_running; then
+	echo "already running (${NAME})"
+	print_urls
+	exit 0
+fi
 
-mkdir -p "${LPD_ROOT}/downloads" "${LPD_ROOT}/cnn2/bit/mnist/results"
+if container_exists && [[ $RECREATE -eq 0 ]]; then
+	echo "Starting existing container ${NAME}…"
+	podman start "${NAME}" >/dev/null
+	print_urls
+	exit 0
+fi
 
-ENV="$(env_file)"
-echo "Using env: ${ENV}"
+if container_exists; then
+	echo "Recreating container ${NAME}…"
+	podman rm -f "${NAME}" >/dev/null 2>&1 || true
+fi
 
-podman run -d \
-	--name "${NAME}" \
-	--env-file "${ENV}" \
-	-p "8301:8301" \
-	-p "8090:8090" \
-	-v "$(vol_opt "${LPD_ROOT}/downloads" /app/downloads)" \
-	-v "$(vol_opt "${LPD_ROOT}/cnn2" /app/cnn2)" \
-	"${IMAGE}" \
-	"$@"
-
-echo ""
-echo "lpd started (${NAME})"
-echo "  Tide   http://127.0.0.1:8301"
-echo "  Ocean  http://127.0.0.1:8090  (when LPD_OCEAN_ONLY=true)"
-echo ""
-echo "  logs:  podman logs -f ${NAME}"
-echo "  stop:  ${SCRIPT_DIR}/stop"
+run_container "${EXTRA[@]}"
+print_urls

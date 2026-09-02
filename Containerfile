@@ -1,17 +1,6 @@
-# Build from the git parent (siblings tide, welvet, webgpu):
-#   podman build -f lpd/Containerfile -t lpd:latest .
-FROM docker.io/library/golang:1.22-bookworm AS build
-
-WORKDIR /src
-COPY tide tide
-COPY welvet welvet
-COPY webgpu webgpu
-COPY lpd lpd
-
-WORKDIR /src/lpd
-RUN go mod download
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/lpd .
-
+# Runtime image — binary only. Build on the host first:
+#   ./podman/build
+# Context is the lpd/ dir (just bin/lpd + this file).
 FROM docker.io/library/debian:bookworm-slim
 
 RUN apt-get update \
@@ -19,9 +8,8 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=build /out/lpd /app/lpd
+COPY bin/lpd /app/lpd
 
-# Tide dashboard + optional ocean watcher
 EXPOSE 8301 8090
 
 ENTRYPOINT ["/app/lpd"]

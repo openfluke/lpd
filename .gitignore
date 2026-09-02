@@ -1,4 +1,5 @@
 downloads/
 cnn2/**/results/
+bin/
 *.env
 .env.local

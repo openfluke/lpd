@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+need_podman
+ensure_machine
+build_binary
+build_image
+
+echo "Done — image ${IMAGE} from $(du -h "${BINARY}" | cut -f1) binary"
