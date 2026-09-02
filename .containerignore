@@ -1,0 +1,8 @@
+**/.git
+**/.git/**
+**/downloads/**
+**/cnn2/**/results/**
+**/cnn2/**/checkpoint/**
+**/*.env
+**/.env.local
+**/node_modules/**

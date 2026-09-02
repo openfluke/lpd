@@ -21,6 +21,19 @@ cp .env.example .env
 go run .
 ```
 
+### Podman (Linux / macOS)
+
+Requires sibling repos `../tide`, `../welvet`, `../webgpu` and [Podman](https://podman.io/) installed. On macOS, init the machine once: `podman machine init && podman machine start`.
+
+```bash
+cp .env.example .env
+./podman/start      # build image + run (ports 8301, 8090)
+./podman/stop       # stop and remove container
+./podman/restart    # stop then start
+```
+
+Persistent data is bind-mounted: `downloads/` (MNIST cache) and `cnn2/` (results).
+
 Or pick from the menu:
 
 ```bash

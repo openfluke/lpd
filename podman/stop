@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+need_podman
+
+if podman container exists "${NAME}" 2>/dev/null; then
+	podman stop -t 15 "${NAME}" || true
+	podman rm -f "${NAME}" || true
+	echo "stopped ${NAME}"
+else
+	echo "container ${NAME} is not running"
+fi

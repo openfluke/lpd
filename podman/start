@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+need_podman
+ensure_machine
+
+BUILD=1
+if [[ "${1:-}" == "--no-build" ]]; then
+	BUILD=0
+	shift
+fi
+
+if [[ $BUILD -eq 1 ]] || ! podman image exists "${IMAGE}" >/dev/null 2>&1; then
+	build_image
+fi
+
+# Idempotent: replace any previous container with the same name.
+podman rm -f "${NAME}" >/dev/null 2>&1 || true
+
+mkdir -p "${LPD_ROOT}/downloads" "${LPD_ROOT}/cnn2/bit/mnist/results"
+
+ENV="$(env_file)"
+echo "Using env: ${ENV}"
+
+podman run -d \
+	--name "${NAME}" \
+	--env-file "${ENV}" \
+	-p "8301:8301" \
+	-p "8090:8090" \
+	-v "$(vol_opt "${LPD_ROOT}/downloads" /app/downloads)" \
+	-v "$(vol_opt "${LPD_ROOT}/cnn2" /app/cnn2)" \
+	"${IMAGE}" \
+	"$@"
+
+echo ""
+echo "lpd started (${NAME})"
+echo "  Tide   http://127.0.0.1:8301"
+echo "  Ocean  http://127.0.0.1:8090  (when LPD_OCEAN_ONLY=true)"
+echo ""
+echo "  logs:  podman logs -f ${NAME}"
+echo "  stop:  ${SCRIPT_DIR}/stop"
